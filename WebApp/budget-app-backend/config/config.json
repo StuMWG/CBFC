@@ -1,7 +1,7 @@
 {
   "development": {
-    "username": "DBUserUsername",
-    "password": "DBUserPassword",
+    "username": "budget_user",
+    "password": "<CBFCBudgetUser1>",
     "database": "budget_db",
     "host": "127.0.0.1",
     "dialect": "postgres"
