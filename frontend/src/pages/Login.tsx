@@ -10,6 +10,7 @@ const Login: React.FC = () => {
     // Redirect to Dashboard
     navigate("/dashboard");
   };
+
   const handleRegistration = () => {
     // Redirect to Registration
     navigate("/registration");
@@ -24,7 +25,7 @@ const Login: React.FC = () => {
       </Card>
       <Card style={{ width: "25rem", padding: "20px" }}>
         <h2 className="text-center">Registration</h2>
-        {/* Login Form Here */}
+        {/* Registration Form Here */}
         <CustomButton label="Register" type="button" onClick={handleRegistration} fullWidth />
       </Card>
     </Container>
