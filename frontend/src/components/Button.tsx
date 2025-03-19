@@ -1,17 +1,20 @@
-import { ReactNode } from "react";
+import React from "react";
+import { Button } from "react-bootstrap";
 
-interface Props {
-  children: ReactNode;
-  color?: "primary" | "secondary" | "danger";
-  onClick: () => void;
+interface CustomButtonProps {
+  label: string;  // Ensure label is properly typed
+  type?: "button" | "submit" | "reset";
+  variant?: string;
+  onClick?: () => void;
+  fullWidth?: boolean;
 }
 
-function Button({ children, onClick, color = "primary" }: Props) {
+const CustomButton: React.FC<CustomButtonProps> = ({ label, type = "button", variant = "primary", onClick, fullWidth = false }) => {
   return (
-    <button type="button" className={"btn btn-" + color} onClick={onClick}>
-      {children}
-    </button>
+    <Button variant={variant} type={type} onClick={onClick} className={fullWidth ? "w-100" : ""}>
+      {label}
+    </Button>
   );
-}
+};
 
-export default Button;
+export default CustomButton;
