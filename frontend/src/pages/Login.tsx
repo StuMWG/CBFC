@@ -1,34 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Card } from "react-bootstrap";
+import { Card} from "react-bootstrap";
 import CustomButton from "../components/Button";
+import TextField from "../components/InputField";
+import "../styles/Login.css";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   const handleLogin = () => {
-    // Redirect to Dashboard
     navigate("/dashboard");
   };
 
   const handleRegistration = () => {
-    // Redirect to Registration
     navigate("/registration");
   };
 
   return (
-    <Container className="d-flex justify-content-center align-items-center vh-100">
-      <Card style={{ width: "25rem", padding: "20px" }}>
-        <h2 className="text-center">Login</h2>
-        {/* Login Form Here */}
-        <CustomButton label="Login" type="button" onClick={handleLogin} fullWidth />
-      </Card>
-      <Card style={{ width: "25rem", padding: "20px" }}>
-        <h2 className="text-center">Registration</h2>
-        {/* Registration Form Here */}
-        <CustomButton label="Register" type="button" onClick={handleRegistration} fullWidth />
-      </Card>
-    </Container>
+    <div className="fullscreen-container">
+    <Card className="shadow-lg p-4" style={{ width: "22rem" }}>
+      <h2 className="text-center mb-4">Login</h2>
+      <TextField label="Username" placeholder="Enter your username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} fullWidth/>
+      <TextField label="Password" placeholder="Enter your password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth/>
+      <CustomButton label="Login" type="button" onClick={handleLogin} fullWidth />
+      <div className="text-center mt-3">
+        <CustomButton label="Register" type="button" onClick={handleRegistration} variant="link" />
+      </div>
+    </Card>
+  </div>
   );
 };
 

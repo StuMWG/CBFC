@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "react-bootstrap";
 
 interface CustomButtonProps {
-  label: string;  // Ensure label is properly typed
+  label: string;
   type?: "button" | "submit" | "reset";
   variant?: string;
   onClick?: () => void;
