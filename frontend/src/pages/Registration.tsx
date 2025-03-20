@@ -17,15 +17,20 @@ const Registration: React.FC = () => {
     navigate("/");
   };
 
+  const handleBack = () => {
+    navigate("/");
+  };
+
   return (
     <div className="fullscreen-container">
       <Card className="shadow-lg p-4" style={{ width: "22rem" }}>
-        <h2 className="text-center mb-4">Login</h2>
+        <h2 className="text-center mb-4">Register</h2>
         <TextField label="Username" placeholder="Enter a username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} fullWidth/>
         <TextField label="Email" placeholder="Enter your email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth/>
         <TextField label="Password" placeholder="Enter a password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth/>
         <TextField label="Verify Password" placeholder="Enter password" type="password" value={passwordVerify} onChange={(e) => verifyPassword(e.target.value)} fullWidth/>
         <CustomButton label="Submit" type="submit" onClick={handleSubmit} fullWidth />
+        <CustomButton label="Back" type="button" onClick={handleBack} variant="link" />
       </Card>
     </div>
     );
