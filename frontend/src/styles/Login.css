@@ -1,8 +1,26 @@
 .fullscreen-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vw;
-    background-color: #f8f9fa;
-  }  
+  background: linear-gradient(to bottom, #30734c 0%, #0f351f 100%)  !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}  
+
+  .title {
+    font-family: 'Helvetica';
+    /*text-shadow: 2px 2px 4px rgba(66, 66, 66, 0.3);*/
+    display: inline-block;
+    position: relative;
+    text-align: left
+  }
+  
+  .line {
+    position: relative;
+    bottom: -7px;
+    width: 120px;
+    height: 1px;
+    opacity: 50%;
+    background-color: #777777; 
+    margin-bottom: 25px; 
+  }

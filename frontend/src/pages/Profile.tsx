@@ -1,15 +1,15 @@
 import React from "react";
 import Navbar from "../components/Navbar"
 
-const BudgetSettings: React.FC = () => {
+const Profile: React.FC = () => {
   return (
     <>
       <Navbar/>
         <div>
-          <h1>Settings</h1>
+        <h1>Hello good user this is your profile</h1>
         </div>
     </>
   );
 };
 
-export default BudgetSettings;
+export default Profile;

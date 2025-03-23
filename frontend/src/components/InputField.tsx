@@ -11,7 +11,6 @@ interface TextFieldProps {
 }
 
 const TextField: React.FC<TextFieldProps> = ({
-  label,
   type = "text",
   placeholder = "",
   value,
@@ -20,7 +19,6 @@ const TextField: React.FC<TextFieldProps> = ({
 }) => {
   return (
     <Form.Group className="mb-3">
-      <Form.Label>{label}</Form.Label>
       <Form.Control
         type={type}
         placeholder={placeholder}
