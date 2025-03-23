@@ -28,7 +28,7 @@ const Registration: React.FC = () => {
           <h2>Budget</h2>
         </div>
         <div className="dashboard-item" onClick={() => navigate("/Reports")}>
-          <h2>Reports</h2>
+          <h2>Reportsdontclickthisdoesntgoanywhere</h2>
         </div>
       </div>
     </>
