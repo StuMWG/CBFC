@@ -1,7 +1,5 @@
 //import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "react-bootstrap";
-import CustomButton from "../components/Button";
 import "../styles/Dashboard.css";
 import Navbar from "../components/Navbar";
 import React, { useEffect } from "react";
@@ -21,14 +19,19 @@ const Registration: React.FC = () => {
 
   return (
     <>
-      <Navbar/>
-      <div className="fullscreen-container">
-        <Card className="shadow-lg p-4" style={{ width: "22rem" }}>
-          <h2 className="text-center mb-4">Budget</h2>
-          <CustomButton label="Budget" type="button" onClick={handleBudget} fullWidth />
-        </Card>
+      <Navbar />
+      <div className="dashboard-grid">
+        <div className="dashboard-item" onClick={() => navigate("/Budget")}>
+          <h2>Budget</h2>
+        </div>
+        <div className="dashboard-item" onClick={() => navigate("/Budget")}>
+          <h2>Budget</h2>
+        </div>
+        <div className="dashboard-item" onClick={() => navigate("/Reports")}>
+          <h2>Reports</h2>
+        </div>
       </div>
-      </>
+    </>
   );
 };
 
