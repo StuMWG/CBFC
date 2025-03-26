@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "budget_user",
-    "password": "<CBFCBudgetUser1>",
-    "database": "budget_db",
-    "host": "127.0.0.1",
+    "username": "devuser",
+    "password": "devpass",
+    "database": "devdb",
+    "host": "136.34.64.120",
     "dialect": "postgres"
   },
   "test": {
