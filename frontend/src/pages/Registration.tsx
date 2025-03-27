@@ -6,6 +6,8 @@ import TextField from "../components/InputField";
 import "../styles/Registration.css";
 import Checkbox from "../components/Checkbox";
 
+import axios from "axios";
+
 const Registration: React.FC = () => {
 
   const navigate = useNavigate();
@@ -16,13 +18,33 @@ const Registration: React.FC = () => {
   const [isTermsAccepted, setIsTermsAccepted] = useState<boolean>(false);
   const [isWarningVisible, setIsWarningVisible] = useState<boolean>(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isTermsAccepted) {
       setIsWarningVisible(true);
-      return; 
+      return;
     }
-    navigate("/dashboard") 
-    
+  
+    if (password !== passwordVerify) {
+      alert("Passwords do not match.");
+      return;
+    }
+  
+    try {
+      const response = await axios.post("http://localhost:5000/api/auth/register", {
+        username,
+        email,
+        password,
+      });
+  
+      const message = response?.data?.message || "Registration succeeded.";
+      alert(message);
+      navigate("/dashboard");
+  
+    } catch (error: any) {
+      const backendMessage = error?.response?.data?.message;
+      alert(backendMessage || "Something went wrong. Please try again.");
+      console.error("Registration error:", error);
+    }
   };
 
   const handleBack = () => {
