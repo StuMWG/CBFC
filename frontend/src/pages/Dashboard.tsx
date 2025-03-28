@@ -27,11 +27,11 @@ const Registration: React.FC = () => {
         <div className="dashboard-item" onClick={() => navigate("/Budget")}>
           <h2>Budget</h2>
         </div>
-        <div className="dashboard-item" onClick={() => navigate("/Budget")}>
-          <h2>Budget</h2>
-        </div>
         <div className="dashboard-item" onClick={() => navigate("/Reports")}>
-          <h2>Reportsdontclickthisdoesntgoanywhere</h2>
+          <h2>Reports</h2>
+        </div>
+        <div className="dashboard-item" onClick={() => navigate("/Nowhere")}>
+          <h2>Some Other Third Thing</h2>
         </div>
       </div>
   
