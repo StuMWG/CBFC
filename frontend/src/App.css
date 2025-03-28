@@ -1,6 +1,6 @@
 #root {
   background: linear-gradient(to bottom, #3d855b 0%, #1b6038 100%);
-  max-width: 1280px;
+  max-width: 100vw; /* was originally 1280px */
   margin: 0;
   padding: 0;
   text-align: center;
