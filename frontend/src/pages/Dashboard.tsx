@@ -19,7 +19,10 @@ const Registration: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+    <Navbar />
+    <div className="dashboard-flex-container">
+      <img src="/src/assets/stonks.jpg" alt="Left" className="side-image" />
+      
       <div className="dashboard-grid">
         <div className="dashboard-item" onClick={() => navigate("/Budget")}>
           <h2>Budget</h2>
@@ -31,7 +34,10 @@ const Registration: React.FC = () => {
           <h2>Reportsdontclickthisdoesntgoanywhere</h2>
         </div>
       </div>
-    </>
+  
+      <img src="/src/assets/piechartpie.jpg" alt="Right" className="side-image" />
+    </div>
+  </>  
   );
 };
 
