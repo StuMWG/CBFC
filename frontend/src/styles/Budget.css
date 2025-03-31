@@ -1,0 +1,23 @@
+.fullscreen-container {
+    background: linear-gradient(to bottom, #30734c 0%, #0f351f 100%)  !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+  }  
+
+  .field-scroll-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .fixed-add-button {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+  }
+  
