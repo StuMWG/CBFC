@@ -5,7 +5,7 @@
     "database": "devdb",
     "host": "136.34.64.120",
     "dialect": "postgres"
-  },
+  }, 
   "test": {
     "username": "root",
     "password": null,

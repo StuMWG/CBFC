@@ -20,24 +20,48 @@ const sequelize = new Sequelize(database, username, password, {
 
 // Define User model
 const User = sequelize.define("User", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   username: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(50),
     unique: true,
     allowNull: false,
   },
   email: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(100),
     unique: true,
     allowNull: false,
   },
   password: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(255),
     allowNull: false,
+  },
+  firstname: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  lastname: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
   },
 }, {
   tableName: "users",
-  timestamps: false,
+  timestamps: false
 });
+
 
 // Test database connection
 sequelize.authenticate()
@@ -91,7 +115,8 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 app.post("/api/auth/register", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, firstname, lastname } = req.body;
+
 
   // Regex validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -124,7 +149,14 @@ app.post("/api/auth/register", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ username, email, password: hashedPassword });
+    const newUser = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+      firstname,
+      lastname,
+    });
+    
 
     return res.status(201).json({
       message: "User registered successfully",
