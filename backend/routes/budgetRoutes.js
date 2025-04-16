@@ -47,45 +47,76 @@ router.get('/user/:userId', async (req, res) => {
 router.post('/', async (req, res) => {
   const { user_id, title, total_amount, items } = req.body;
 
-  // Basic Validation
   if (!user_id || !title || total_amount === undefined || !Array.isArray(items)) {
-    return res.status(400).json({ message: 'Missing required fields: user_id, title, total_amount, items array.' });
+    return res.status(400).json({ message: 'Missing required fields' });
   }
 
   let transaction;
   try {
     transaction = await sequelize.transaction();
 
-    // Create the main budget record
+    // Check for existing budget with same title
+    const existingBudget = await Budget.findOne({
+      where: { user_id, title },
+      transaction
+    });
+
+    if (existingBudget) {
+      // Delete existing items
+      await BudgetItem.destroy({
+        where: { budget_id: existingBudget.id },
+        transaction
+      });
+
+      // Update the existing budget
+      await existingBudget.update({
+        total_amount,
+        updated_at: new Date()
+      }, { transaction });
+
+      // Create new items
+      const newItems = items.map(item => ({
+        budget_id: existingBudget.id,
+        label: item.label,
+        value: item.value
+      }));
+
+      await BudgetItem.bulkCreate(newItems, { transaction });
+
+      await transaction.commit();
+      return res.status(200).json({ 
+        message: 'Budget updated successfully',
+        budget: await Budget.findByPk(existingBudget.id, {
+          include: [{ model: BudgetItem, as: 'items' }]
+        })
+      });
+    }
+
+    // Create new budget
     const newBudget = await Budget.create({
       user_id,
       title,
-      total_amount,
-      // created_at and updated_at handled by defaultValue/timestamps
+      total_amount
     }, { transaction });
 
-    // Create associated budget items
-    if (items.length > 0) {
-      const budgetItemsData = items.map(item => ({
-        budget_id: newBudget.id,
-        label: item.label,
-        value: item.value,
-      }));
-      await BudgetItem.bulkCreate(budgetItemsData, { transaction });
-    }
+    const newItems = items.map(item => ({
+      budget_id: newBudget.id,
+      label: item.label,
+      value: item.value
+    }));
+
+    await BudgetItem.bulkCreate(newItems, { transaction });
 
     await transaction.commit();
-
-    // Refetch the created budget with items to return it
-    const createdBudgetWithItems = await Budget.findByPk(newBudget.id, {
-      include: [{ model: BudgetItem, as: 'items' }]
+    res.status(201).json({ 
+      message: 'Budget created successfully',
+      budget: await Budget.findByPk(newBudget.id, {
+        include: [{ model: BudgetItem, as: 'items' }]
+      })
     });
-
-    res.status(201).json({ message: 'Budget created successfully', budget: createdBudgetWithItems });
-
   } catch (error) {
     if (transaction) await transaction.rollback();
-    handleError(res, error, 'Error creating budget');
+    handleError(res, error, 'Error saving budget');
   }
 });
 
@@ -154,5 +185,63 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// Get all budgets for a user
+router.get('/user/:userId/history', async (req, res) => {
+  const userId = parseInt(req.params.userId, 10);
+  if (isNaN(userId)) {
+    return res.status(400).json({ message: 'Invalid user ID format.' });
+  }
+
+  try {
+    const budgets = await Budget.findAll({
+      where: { user_id: userId },
+      order: [['created_at', 'DESC']],
+      include: [{
+        model: BudgetItem,
+        as: 'items'
+      }]
+    });
+
+    res.status(200).json({ budgets });
+  } catch (error) {
+    handleError(res, error, 'Error fetching budget history');
+  }
+});
+
+// Delete a budget
+router.delete('/:budgetId', async (req, res) => {
+  const budgetId = parseInt(req.params.budgetId, 10);
+  if (isNaN(budgetId)) {
+    return res.status(400).json({ message: 'Invalid budget ID format.' });
+  }
+
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+
+    // First delete all associated budget items
+    await BudgetItem.destroy({
+      where: { budget_id: budgetId },
+      transaction
+    });
+
+    // Then delete the budget
+    const deleted = await Budget.destroy({
+      where: { id: budgetId },
+      transaction
+    });
+
+    if (!deleted) {
+      await transaction.rollback();
+      return res.status(404).json({ message: 'Budget not found.' });
+    }
+
+    await transaction.commit();
+    res.status(200).json({ message: 'Budget deleted successfully' });
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    handleError(res, error, 'Error deleting budget');
+  }
+});
 
 module.exports = router; 

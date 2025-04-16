@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Container, Row, Col, Card, Form, Button, InputGroup, ListGroup, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, InputGroup, ListGroup, Alert, Modal, Button as BootstrapButton } from 'react-bootstrap';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import { FaTrash, FaSave, FaHistory } from 'react-icons/fa'; // Import icons
@@ -28,6 +28,85 @@ interface BudgetData {
   updated_at?: string;
 }
 
+interface BudgetHistoryModalProps {
+  show: boolean;
+  onHide: () => void;
+  budgets: BudgetData[];
+  onSelectBudget: (budget: BudgetData) => void;
+  onDeleteBudget: (budgetId: string) => void;
+}
+
+interface ConfirmationModalProps {
+  show: boolean;
+  onHide: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+}
+
+const BudgetHistoryModal: React.FC<BudgetHistoryModalProps> = ({ show, onHide, budgets, onSelectBudget, onDeleteBudget }) => {
+  return (
+    <Modal show={show} onHide={onHide} size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Budget History</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {budgets.length === 0 ? (
+          <p>No previous budgets found.</p>
+        ) : (
+          <div className="list-group">
+            {budgets.map((budget) => (
+              <div key={budget.id} className="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 className="mb-1">{budget.title}</h5>
+                  <small className="text-muted">
+                    Created: {new Date(budget.created_at || Date.now()).toLocaleDateString()}
+                  </small>
+                </div>
+                <div>
+                  <BootstrapButton
+                    variant="primary"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => onSelectBudget(budget)}
+                  >
+                    Load
+                  </BootstrapButton>
+                  <BootstrapButton
+                    variant="danger"
+                    size="sm"
+                    onClick={() => onDeleteBudget(budget.id)}
+                  >
+                    Delete
+                  </BootstrapButton>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal.Body>
+    </Modal>
+  );
+};
+
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ show, onHide, onConfirm, title, message }) => {
+  return (
+    <Modal show={show} onHide={onHide}>
+      <Modal.Header closeButton>
+        <Modal.Title>{title}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>{message}</Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={onHide}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={onConfirm}>
+          Continue
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+};
 
 const Budget: React.FC = () => {
   const [userId, setUserId] = useState<string | null>(null);
@@ -40,6 +119,11 @@ const Budget: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [budgetHistory, setBudgetHistory] = useState<BudgetData[]>([]);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [duplicateBudget, setDuplicateBudget] = useState<BudgetData | null>(null);
+  const [isOverwriting, setIsOverwriting] = useState(false);
 
   // --- Get User ID ---
   useEffect(() => {
@@ -71,8 +155,8 @@ const Budget: React.FC = () => {
     setError(null);
     console.log(`Fetching budget data for user ${userId}...`);
     try {
-      // *** Assumption: GET endpoint to fetch the user's *current* budget ***
-      const response = await axios.get<{ budget: BudgetData }>(`/api/budgets/user/${userId}`); 
+      // Update the API endpoint URL
+      const response = await axios.get<{ budget: BudgetData }>(`http://localhost:5000/api/budgets/user/${userId}`); 
       if (response.data && response.data.budget) {
         const { id, title, total_amount, items: fetchedItems } = response.data.budget;
         setBudgetId(id);
@@ -105,11 +189,59 @@ const Budget: React.FC = () => {
     }
   }, [userId, fetchBudgetData]);
 
+  // Add function to fetch budget history
+  const fetchBudgetHistory = async () => {
+    if (!userId) return;
+    
+    try {
+      const response = await axios.get<{ budgets: BudgetData[] }>(`http://localhost:5000/api/budgets/user/${userId}/history`);
+      setBudgetHistory(response.data.budgets);
+    } catch (error) {
+      console.error("Error fetching budget history:", error);
+      setError("Failed to load budget history");
+    }
+  };
+
+  // Add function to handle budget deletion
+  const handleDeleteBudget = async (budgetId: string) => {
+    if (!confirm("Are you sure you want to delete this budget?")) return;
+    
+    try {
+      await axios.delete(`http://localhost:5000/api/budgets/${budgetId}`);
+      // If the deleted budget was the current one, reset the form
+      if (budgetId === budgetId) {
+        setBudgetId(null);
+        setBudgetTitle('Monthly Budget');
+        setTotalIncome(0);
+        setItems([]);
+      }
+      // Refresh the history
+      fetchBudgetHistory();
+      alert('Budget deleted successfully');
+    } catch (error) {
+      console.error("Error deleting budget:", error);
+      setError("Failed to delete budget");
+    }
+  };
+
+  // Update handleSaveBudget to include validation
   const handleSaveBudget = async () => {
     if (!userId) {
       setError("Cannot save budget. User not identified.");
       return;
     }
+
+    // Validate that the budget is not blank
+    if (totalIncome <= 0) {
+      setError("Total income must be greater than 0");
+      return;
+    }
+
+    if (items.length === 0) {
+      setError("Please add at least one budget item");
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
 
@@ -117,40 +249,89 @@ const Budget: React.FC = () => {
       user_id: userId,
       title: budgetTitle,
       total_amount: totalIncome,
-      items: items.map(({ id, label, value }) => ({ label, value })) // Send only necessary item data
+      items: items.map(({ id, label, value }) => ({ label, value }))
     };
 
     try {
-      let response;
-      if (budgetId) {
-        // *** Assumption: PUT endpoint to update existing budget by ID ***
-        console.log(`Updating budget ${budgetId}...`, budgetPayload);
-        response = await axios.put(`/api/budgets/${budgetId}`, budgetPayload);
-        console.log('Budget updated:', response.data);
-        alert('Budget updated successfully!');
-      } else {
-        // *** Assumption: POST endpoint to create new budget ***
-        console.log('Creating new budget...', budgetPayload);
-        response = await axios.post('/api/budgets', budgetPayload);
-        console.log('Budget created:', response.data);
-        // Store the new budget ID after creation
-        if (response.data && response.data.budget && response.data.budget.id) {
-             setBudgetId(response.data.budget.id);
+      // Only check for duplicates if we're not overwriting
+      if (!isOverwriting) {
+        const response = await axios.get(`http://localhost:5000/api/budgets/user/${userId}/history`);
+        const existingBudget = response.data.budgets.find((b: BudgetData) => b.title === budgetTitle);
+
+        if (existingBudget) {
+          setDuplicateBudget(existingBudget);
+          setShowConfirmationModal(true);
+          setIsSaving(false);
+          return;
         }
-        alert('Budget saved successfully!');
       }
-      // Optionally refetch data after save to ensure consistency
-      // fetchBudgetData(); 
+
+      // Create new budget
+      const saveResponse = await axios.post('http://localhost:5000/api/budgets', budgetPayload);
+      console.log('Budget created:', saveResponse.data);
+      if (saveResponse.data && saveResponse.data.budget && saveResponse.data.budget.id) {
+        setBudgetId(saveResponse.data.budget.id);
+      }
+      alert('Budget saved successfully!');
+      fetchBudgetHistory();
     } catch (err: any) {
       console.error("Error saving budget:", err);
       setError("Failed to save budget. " + (err.response?.data?.message || err.message));
-       alert("Failed to save budget. " + (err.response?.data?.message || err.message));
     } finally {
       setIsSaving(false);
+      setIsOverwriting(false);
     }
   };
 
- // --- Event Handlers (Modified for potential future item-specific saves) ---
+  const handleConfirmOverwrite = async () => {
+    if (!userId) {
+      setError("Cannot save budget. User not identified.");
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+
+    const budgetPayload = {
+      user_id: userId,
+      title: budgetTitle,
+      total_amount: totalIncome,
+      items: items.map(({ id, label, value }) => ({ label, value }))
+    };
+
+    try {
+      const saveResponse = await axios.post('http://localhost:5000/api/budgets', budgetPayload);
+      console.log('Budget updated:', saveResponse.data);
+      if (saveResponse.data && saveResponse.data.budget && saveResponse.data.budget.id) {
+        setBudgetId(saveResponse.data.budget.id);
+      }
+      alert('Budget updated successfully!');
+      fetchBudgetHistory();
+    } catch (err: any) {
+      console.error("Error updating budget:", err);
+      setError("Failed to update budget. " + (err.response?.data?.message || err.message));
+    } finally {
+      setIsSaving(false);
+      setShowConfirmationModal(false);
+    }
+  };
+
+  // Update the View History button click handler
+  const handleViewHistory = async () => {
+    await fetchBudgetHistory();
+    setShowHistoryModal(true);
+  };
+
+  // Add function to handle selecting a budget from history
+  const handleSelectBudget = (budget: BudgetData) => {
+    setBudgetId(budget.id);
+    setBudgetTitle(budget.title);
+    setTotalIncome(budget.total_amount);
+    setItems(budget.items.map(item => ({ ...item })));
+    setShowHistoryModal(false);
+  };
+
+  // --- Event Handlers (Modified for potential future item-specific saves) ---
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
     const value = parseFloat(newItemValue);
@@ -272,8 +453,8 @@ const Budget: React.FC = () => {
             {/* Placeholder: View Previous Budgets Button */} 
             <Button 
               variant="outline-secondary" 
-              onClick={fetchBudgetData} // Re-fetches current budget for now
-              title="Reload Saved Budget / View History (Placeholder)"
+              onClick={handleViewHistory}
+              title="View Budget History"
             >
                <FaHistory /> View History
             </Button>
@@ -414,6 +595,22 @@ const Budget: React.FC = () => {
           </Card>
         </Col>
       </Row>
+
+      <ConfirmationModal
+        show={showConfirmationModal}
+        onHide={() => setShowConfirmationModal(false)}
+        onConfirm={handleConfirmOverwrite}
+        title="Budget Already Exists"
+        message={`A budget with the title "${budgetTitle}" already exists. Would you like to overwrite it?`}
+      />
+      
+      <BudgetHistoryModal
+        show={showHistoryModal}
+        onHide={() => setShowHistoryModal(false)}
+        budgets={budgetHistory}
+        onSelectBudget={handleSelectBudget}
+        onDeleteBudget={handleDeleteBudget}
+      />
     </Container>
   );
 };
