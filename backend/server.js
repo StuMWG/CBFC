@@ -1,70 +1,21 @@
 const express = require("express");
 const cors = require("cors");
-const { Sequelize, DataTypes, Op } = require("sequelize");
+const { Op } = require("sequelize");
 const bcrypt = require("bcryptjs");
-const dbConfig = require("./config/config.json");
+
+// Require models (which initializes db connection via index.js)
+const db = require('./models');
+const User = db.User; // Get User model from db object
+
+// Require budget routes
+const budgetRoutes = require('./routes/budgetRoutes');
 
 const app = express();
 app.use(cors());
 app.use(express.json()); // Middleware to parse JSON
 
-// Get database credentials from config.json
-const { username, password, database, host, dialect } = dbConfig.development;
-
-// Initialize Sequelize connection
-const sequelize = new Sequelize(database, username, password, {
-  host,
-  dialect,
-  logging: console.log,
-});
-
-// Define User model
-const User = sequelize.define("User", {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  username: {
-    type: DataTypes.STRING(50),
-    unique: true,
-    allowNull: false,
-  },
-  email: {
-    type: DataTypes.STRING(100),
-    unique: true,
-    allowNull: false,
-  },
-  password: {
-    type: DataTypes.STRING(255),
-    allowNull: false,
-  },
-  firstname: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  lastname: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  created_at: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
-  },
-  updated_at: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
-  },
-}, {
-  tableName: "users",
-  timestamps: false
-});
-
-
-// Test database connection
-sequelize.authenticate()
+// Test database connection (using imported sequelize instance)
+db.sequelize.authenticate()
   .then(() => console.log("Database connected successfully"))
   .catch((err) => console.error("Unable to connect to database:", err));
 
@@ -72,6 +23,9 @@ sequelize.authenticate()
 app.get("/", (req, res) => {
   res.send("Budget App API is running...");
 });
+
+// Mount Budget API Routes
+app.use('/api/budgets', budgetRoutes);
 
 // Login route (email or username)
 app.post("/api/auth/login", async (req, res) => {
@@ -173,4 +127,7 @@ app.post("/api/auth/register", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Use db.sequelize.sync() if you want to sync models on start (optional)
+// db.sequelize.sync().then(() => { 
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// });

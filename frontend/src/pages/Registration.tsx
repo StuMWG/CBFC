@@ -92,9 +92,17 @@ const Registration: React.FC = () => {
           </Card>
         </div>
 
-        {/* Right Side: Image */}
+        {/* Right Side: Image and Guest Button */}
         <div className="registration-right">
           <img src="src/assets/landingpage12.png" alt="landingpage" className="registration-image" />
+          <div className="mt-3" style={{ width: '100%', textAlign: 'center' }}>
+            <CustomButton 
+              label="Continue as Guest"
+              type="button" 
+              onClick={() => navigate("/dashboard")}
+              variant="secondary"
+            />
+          </div>
         </div>
       </div>
     </div>

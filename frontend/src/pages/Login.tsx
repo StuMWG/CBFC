@@ -22,6 +22,17 @@ const Login: React.FC = () => {
   
       if (response.data && response.data.message === "Login successful") {
         console.log("Login successful:", response.data.user);
+        
+        // Store user info (username and id) in localStorage
+        if (response.data.user && response.data.user.username && response.data.user.id) {
+          localStorage.setItem('loggedInUser', JSON.stringify({
+             username: response.data.user.username,
+             userId: response.data.user.id // Store the user ID
+          }));
+        } else {
+          console.warn("User data, username, or ID missing in login response.");
+        }
+        
         navigate("/dashboard");
       }
     } catch (error: any) {
@@ -62,9 +73,17 @@ const Login: React.FC = () => {
             </div>
           </Card>
         </div>
-        {/* Right Side: Image */}
+        {/* Right Side: Image and Guest Button */}
         <div className="login-right">
-        <img src="src/assets/landingpage12.png" alt="landingpage" className="login-image" />
+          <img src="src/assets/landingpage12.png" alt="landingpage" className="login-image" />
+          <div className="mt-3" style={{ width: '100%', textAlign: 'center' }}> 
+            <CustomButton 
+              label="Continue as Guest"
+              type="button" 
+              onClick={() => navigate("/dashboard")}
+              variant="secondary"
+            />
+          </div>
         </div>
       </div>
     </div>
