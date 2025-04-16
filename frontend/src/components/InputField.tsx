@@ -18,13 +18,14 @@ const TextField: React.FC<TextFieldProps> = ({
   fullWidth = false,
 }) => {
   return (
-    <Form.Group className="mb-3">
+    <Form.Group className="mb-3" style={{ width: fullWidth ? '100%' : 'auto' }}>
       <Form.Control
         type={type}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
         className={fullWidth ? "w-100" : ""}
+        style={{ width: '100%' }}
       />
     </Form.Group>
   );

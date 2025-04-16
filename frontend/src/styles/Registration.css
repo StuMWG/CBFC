@@ -1,26 +1,75 @@
 .fullscreen-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vw;
-    background-color: #f8f9fa;
-  }  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100vw;
+  padding: 20px 0;
+  background-color: #f8f9fa;
+  overflow-y: auto;
+}
 
-  .title {
-    font-family: 'Helvetica';
-    /*text-shadow: 2px 2px 4px rgba(66, 66, 66, 0.3);*/
-    display: inline-block;
-    position: relative;
-    text-align: left
+.registration-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 80%;
+  max-width: 1200px;
+  height: auto;
+}
+
+.registration-left {
+  width: 45%;
+  margin-top: 100px;
+}
+
+.registration-right {
+  width: 50%;
+}
+
+.card-container {
+  padding: 2rem;
+}
+
+.title {
+  font-family: 'Helvetica';
+  text-align: left;
+}
+
+.line {
+  position: relative;
+  bottom: -7px;
+  width: 120px;
+  height: 1px;
+  opacity: 50%;
+  background-color: #777777;
+  margin-bottom: 25px;
+}
+
+.warning-message {
+  color: red;
+  margin-top: 5px;
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+
+.registration-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .registration-layout {
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .line {
-    position: relative;
-    bottom: -7px;
-    width: 120px;
-    height: 1px;
-    opacity: 50%;
-    background-color: #777777; 
-    margin-bottom: 25px; 
+
+  .registration-left, .registration-right {
+    width: 100%;
   }
+
+  .registration-right {
+    margin-top: 2rem;
+  }
+}

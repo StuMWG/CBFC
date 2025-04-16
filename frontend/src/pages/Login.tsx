@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {Card} from "react-bootstrap";
 import CustomButton from "../components/Button";
 import TextField from "../components/InputField";
+import Checkbox from "../components/Checkbox";
 import "../styles/Login.css";
 import axios from "axios";
 
@@ -10,6 +11,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const handleLogin = async () => {
     try {
@@ -42,17 +44,29 @@ const Login: React.FC = () => {
 
   return (
     <div className="fullscreen-container">
-      <Card className="shadow-lg p-4 text-left" style={{ width: "22rem" }}>
-        <h2 className="title">Login</h2>
-        <div className="line"></div>
-        <TextField label="Email or Username" placeholder="Enter your email or username" type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} fullWidth/>
-        <TextField label="Password" placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth/>
-        <CustomButton label="Login" type="button" onClick={handleLogin} fullWidth />
-        <div className="mt-3">
-          <CustomButton label="Forgot password?" type="button" onClick={handleForgotPassword} variant="link"/>
-          <CustomButton label="Don't have an account?" type="button" onClick={handleRegistration} variant="link" />
+      <div className="login-layout">
+        {/* Left Side: Login Card */}
+        <div className="login-left">
+          <Card className="shadow-lg p-4 text-left" style={{ width: "22rem" }}>
+            <h2 className="title">Login</h2>
+            <div className="line"></div>
+            <div className="input-group">
+              <TextField label="Email or Username" placeholder="Enter your email or username" type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} fullWidth/>
+              <TextField label="Password" placeholder="Password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} fullWidth/>
+              <Checkbox label="Show password" checked={showPassword} onChange={(e) => setShowPassword(e.target.checked)} />
+            </div>
+            <CustomButton label="Login" type="button" onClick={handleLogin} fullWidth />
+            <div className="mt-3">
+              <CustomButton label="Forgot password?" type="button" onClick={handleForgotPassword} variant="link"/>
+              <CustomButton label="Don't have an account?" type="button" onClick={handleRegistration} variant="link" />
+            </div>
+          </Card>
         </div>
-      </Card>
+        {/* Right Side: Image */}
+        <div className="login-right">
+        <img src="src/assets/landingpage12.png" alt="landingpage" className="login-image" />
+        </div>
+      </div>
     </div>
   );
 };
