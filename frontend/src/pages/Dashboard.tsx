@@ -1,11 +1,11 @@
 //import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
-import Navbar from "../components/Navbar";
+// import Navbar from "../components/Navbar"; // Removed import
 import React, { useEffect } from "react";
 
 
-const Registration: React.FC = () => {
+const Dashboard: React.FC = () => { // Renamed component
 
   useEffect(() => {
     document.title = "Dashboard - CBFC";
@@ -13,13 +13,13 @@ const Registration: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const handleBudget = () => {
-    navigate("/Budget");
-  };
+  // const handleBudget = () => { // This function seems unused now
+  //   navigate("/Budget");
+  // };
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */ /* Removed instance */}
       <div className="dashboard-flex-container">
         <div className="side-image-wrapper">
           <img src="/src/assets/stonks.jpg" alt="Left" className="side-image" />
@@ -47,4 +47,4 @@ const Registration: React.FC = () => {
   );
 };
 
-export default Registration;
+export default Dashboard; // Updated export
