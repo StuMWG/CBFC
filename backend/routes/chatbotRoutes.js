@@ -57,8 +57,7 @@ router.post('/chat', async (req, res) => {
     const generatedText = response.choices[0].message.content.trim();
 
     // Add disclaimer to the response
-    const disclaimer = "\n\n*Disclaimer: This is general financial information and not professional advice. Please consult with a qualified financial advisor for personalized advice.*";
-    const fullResponse = generatedText + disclaimer;
+    const fullResponse = generatedText;
 
     res.json({ response: fullResponse });
   } catch (error) {
