@@ -23,12 +23,16 @@ const Login: React.FC = () => {
       if (response.data && response.data.message === "Login successful") {
         console.log("Login successful:", response.data.user);
         
-        // Store user info (username and id) in localStorage
+        // Store user info and token
         if (response.data.user && response.data.user.username && response.data.user.id) {
           localStorage.setItem('loggedInUser', JSON.stringify({
-             username: response.data.user.username,
-             userId: response.data.user.id // Store the user ID
+            username: response.data.user.username,
+            userId: response.data.user.id
           }));
+          // Store the token
+          localStorage.setItem('token', response.data.token);
+          // Set default authorization header for all future requests
+          axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
         } else {
           console.warn("User data, username, or ID missing in login response.");
         }

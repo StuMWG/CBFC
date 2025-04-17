@@ -18,6 +18,11 @@ router.get('/user/:userId', async (req, res) => {
     return res.status(400).json({ message: 'Invalid user ID format.' });
   }
 
+  // Verify the requested user ID matches the authenticated user
+  if (userId !== req.user.id) {
+    return res.status(403).json({ message: 'Unauthorized access to user data' });
+  }
+
   try {
     const budget = await Budget.findOne({
       where: { user_id: userId },
@@ -45,9 +50,10 @@ router.get('/user/:userId', async (req, res) => {
 // --- POST /api/budgets --- 
 // Create a new budget for a user
 router.post('/', async (req, res) => {
-  const { user_id, title, total_amount, items } = req.body;
+  const { title, total_amount, items } = req.body;
+  const userId = req.user.id; // Get user ID from authenticated user
 
-  if (!user_id || !title || total_amount === undefined || !Array.isArray(items)) {
+  if (!title || total_amount === undefined || !Array.isArray(items)) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
@@ -57,7 +63,7 @@ router.post('/', async (req, res) => {
 
     // Check for existing budget with same title
     const existingBudget = await Budget.findOne({
-      where: { user_id, title },
+      where: { user_id: userId, title },
       transaction
     });
 
@@ -94,7 +100,7 @@ router.post('/', async (req, res) => {
 
     // Create new budget
     const newBudget = await Budget.create({
-      user_id,
+      user_id: userId,
       title,
       total_amount
     }, { transaction });
@@ -192,6 +198,11 @@ router.get('/user/:userId/history', async (req, res) => {
     return res.status(400).json({ message: 'Invalid user ID format.' });
   }
 
+  // Verify the requested user ID matches the authenticated user
+  if (userId !== req.user.id) {
+    return res.status(403).json({ message: 'Unauthorized access to user data' });
+  }
+
   try {
     const budgets = await Budget.findAll({
       where: { user_id: userId },
@@ -219,22 +230,28 @@ router.delete('/:budgetId', async (req, res) => {
   try {
     transaction = await sequelize.transaction();
 
-    // First delete all associated budget items
+    // First verify the budget belongs to the authenticated user
+    const budget = await Budget.findOne({
+      where: { id: budgetId, user_id: req.user.id },
+      transaction
+    });
+
+    if (!budget) {
+      await transaction.rollback();
+      return res.status(404).json({ message: 'Budget not found or unauthorized access.' });
+    }
+
+    // Delete all associated budget items
     await BudgetItem.destroy({
       where: { budget_id: budgetId },
       transaction
     });
 
-    // Then delete the budget
-    const deleted = await Budget.destroy({
+    // Delete the budget
+    await Budget.destroy({
       where: { id: budgetId },
       transaction
     });
-
-    if (!deleted) {
-      await transaction.rollback();
-      return res.status(404).json({ message: 'Budget not found.' });
-    }
 
     await transaction.commit();
     res.status(200).json({ message: 'Budget deleted successfully' });

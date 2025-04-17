@@ -3,9 +3,20 @@ import { Navbar, Nav, Dropdown, Image } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/cblogo.png"; // Adjust path to your logo image
 import profilePic from "../assets/profilepictureexample.png"; // Adjust path to profile image
+import axios from "axios";
 
 const CBFCNavbar: React.FC = () => {
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear user data and token
+    localStorage.removeItem('loggedInUser');
+    localStorage.removeItem('token');
+    // Remove authorization header
+    delete axios.defaults.headers.common['Authorization'];
+    // Navigate to login page
+    navigate("/");
+  };
 
   return (
     <Navbar bg="light" expand="lg" className="shadow-sm w-100">
@@ -25,7 +36,7 @@ const CBFCNavbar: React.FC = () => {
               <Dropdown.Item onClick={() => navigate("/profile")}>Profile</Dropdown.Item>
               <Dropdown.Item onClick={() => navigate("/settings")}>Settings</Dropdown.Item>
               <Dropdown.Divider />
-              <Dropdown.Item onClick={() => navigate("/")}>Logout</Dropdown.Item>
+              <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </Nav>

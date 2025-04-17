@@ -2,13 +2,28 @@ const express = require("express");
 const cors = require("cors");
 const { Op } = require("sequelize");
 const bcrypt = require("bcryptjs");
+const jwt = require('jsonwebtoken');
+const auth = require('./middleware/auth');
+require('dotenv').config();
 
 // Require models (which initializes db connection via index.js)
 const db = require('./models');
 const User = db.User; // Get User model from db object
 
-// Require budget routes
+// Require routes
 const budgetRoutes = require('./routes/budgetRoutes');
+const chatbotRoutes = require('./routes/chatbotRoutes');
+
+// Check for required environment variables
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL ERROR: JWT_SECRET is not defined in environment variables');
+  process.exit(1);
+}
+
+if (!process.env.HUGGINGFACE_API_KEY) {
+  console.error('FATAL ERROR: HUGGINGFACE_API_KEY is not defined in environment variables');
+  process.exit(1);
+}
 
 const app = express();
 app.use(cors());
@@ -23,9 +38,6 @@ db.sequelize.authenticate()
 app.get("/", (req, res) => {
   res.send("Budget App API is running...");
 });
-
-// Mount Budget API Routes
-app.use('/api/budgets', budgetRoutes);
 
 // Login route (email or username)
 app.post("/api/auth/login", async (req, res) => {
@@ -54,8 +66,20 @@ app.post("/api/auth/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid username/email or password" });
     }
 
+    // Create JWT token
+    const token = jwt.sign(
+      { 
+        id: user.id,
+        username: user.username,
+        email: user.email
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
     res.json({
       message: "Login successful",
+      token,
       user: {
         id: user.id,
         username: user.username,
@@ -125,6 +149,10 @@ app.post("/api/auth/register", async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
+
+// Mount API Routes
+app.use('/api/budgets', auth, budgetRoutes);
+app.use('/api/chatbot', auth, chatbotRoutes);
 
 const PORT = process.env.PORT || 5000;
 // Use db.sequelize.sync() if you want to sync models on start (optional)
