@@ -436,7 +436,7 @@ const Budget: React.FC = () => {
   }
 
   return (
-    <Container fluid className="mt-4 px-4">
+    <Container fluid className="mt-4 px-4" style={{ height: 'calc(100vh - 100px)', overflow: 'auto' }}>
        <Row className="mb-3 align-items-center">
          <Col>
            {/* Allow editing title? Maybe later. For now, display it. */}
@@ -521,7 +521,7 @@ const Budget: React.FC = () => {
         <Col md={6} className="mb-4">
           <Card>
             <Card.Header as="h5">Budget Categories</Card.Header>
-            <Card.Body>
+            <Card.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
               <Form onSubmit={handleAddItem}>
                 <Row>
                   <Col sm={6}>
@@ -583,7 +583,7 @@ const Budget: React.FC = () => {
         <Col md={6} className="mb-4">
           <Card>
              <Card.Header as="h5">Allocation Chart</Card.Header>
-            <Card.Body className="d-flex justify-content-center align-items-center" style={{minHeight: '300px'}}>{/* Ensure body has height */}
+            <Card.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
               {items.length > 0 ? (
                 <div style={{ position: 'relative', width: '100%', maxWidth: '400px' }}> {/* Wrapper for sizing */} 
                     <Pie data={chartData} options={chartOptions} />

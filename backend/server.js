@@ -20,8 +20,8 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
-if (!process.env.HUGGINGFACE_API_KEY) {
-  console.error('FATAL ERROR: HUGGINGFACE_API_KEY is not defined in environment variables');
+if (!process.env.OPENAI_API_KEY) {
+  console.error('FATAL ERROR: OPENAI_API_KEY is not defined in environment variables');
   process.exit(1);
 }
 

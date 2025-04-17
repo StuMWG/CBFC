@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { HfInference } = require('@huggingface/inference');
+const OpenAI = require('openai');
 
-// Initialize Hugging Face inference
-const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
+// Initialize OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
 // Financial context to guide the model
 const FINANCIAL_CONTEXT = `You are a helpful financial assistant. Your role is to provide general financial information and education.
@@ -24,11 +26,6 @@ You should NOT:
 
 Keep responses clear, concise, and focused on practical advice.`;
 
-// Helper function to format the prompt
-const formatPrompt = (question) => {
-  return `${FINANCIAL_CONTEXT}\n\nQuestion: ${question}\nAnswer:`;
-};
-
 // Chat endpoint
 router.post('/chat', async (req, res) => {
   try {
@@ -38,26 +35,26 @@ router.post('/chat', async (req, res) => {
       return res.status(400).json({ error: 'Question is required' });
     }
 
-    const prompt = formatPrompt(question);
+    const prompt = `${FINANCIAL_CONTEXT}\n\nQuestion: ${question}\nAnswer:`;
 
-    const response = await hf.textGeneration({
-      model: "gpt2",
-      inputs: prompt,
-      parameters: {
-        max_new_tokens: 100,
-        temperature: 0.7,
-        top_k: 50,
-        top_p: 0.95,
-        do_sample: true,
-        return_full_text: false
-      }
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: FINANCIAL_CONTEXT
+        },
+        {
+          role: "user",
+          content: question
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 150
     });
 
-    // Clean up and format the response
-    let generatedText = response.generated_text
-      .split('\n')[0]  // Take only the first paragraph
-      .replace(/["""]/g, '')  // Remove quotes
-      .trim();
+    // Get the response text
+    const generatedText = response.choices[0].message.content.trim();
 
     // Add disclaimer to the response
     const disclaimer = "\n\n*Disclaimer: This is general financial information and not professional advice. Please consult with a qualified financial advisor for personalized advice.*";
